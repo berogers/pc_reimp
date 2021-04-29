@@ -92,9 +92,9 @@ def main():
     prior_type = 'gauss'
     # prior_type = 'kurt'
 
-    class_type = 'NC'
+    # class_type = 'NC'
     # class_type = 'C1'
-    # class_type = 'C2'
+    class_type = 'C2'
 
     pcmod_out = open('pcmod_trained_ppixel_{}_{}.pydb'.format(prior_type,class_type),'wb')
     pickle.dump(pcmod, pcmod_out)
