@@ -315,42 +315,42 @@ class PredictiveCodingClassifier:
 
                     # NOTE: self.p.k_r learning rate
                     # r[i] update
-                    self.r[i] = self.r[i] + (k_r / self.p.sigma_sq[i]) \
-                    * self.U[i].T.dot(self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])) \
-                    + (k_r / self.p.sigma_sq[i+1]) * (self.f(self.U[i+1].dot(self.r[i+1]))[0] - self.r[i]) \
+                    self.r[i] = self.r[i] + ((k_r / self.p.sigma_sq[i]) \
+                    * self.U[i].T.dot(self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])))/784 \
+                    + ((k_r / self.p.sigma_sq[i+1]) * (self.f(self.U[i+1].dot(self.r[i+1]))[0] - self.r[i]))/32 \
                     - (k_r / 2) * self.g(self.r[i],self.p.alpha[i])[1]
 
 
                     # U[i] update
-                    self.U[i] = self.U[i] + (k_U / self.p.sigma_sq[i]) \
-                    * (self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])).dot(self.r[i].T) \
+                    self.U[i] = self.U[i] + ((k_U / self.p.sigma_sq[i]) \
+                    * (self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])).dot(self.r[i].T))/784 \
                     - (k_U / 2) * self.h(self.U[i],self.p.lam[i])[1]
 
 
-                # """ r(n) update (C1) """
-                # self.r[n] = self.r[n] + (k_r / self.p.sigma_sq[n]) \
-                # * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])) \
-                # - (k_r / 2) * self.g(self.r[n],self.p.alpha[n])[1] \
-                # # # classification term
-                # # + (k_o / 2) * (label[:,None] - softmax(self.r[n]))
-
-                """ r(n) update (C2) """
-                self.r[n] = self.r[n] + (k_r / self.p.sigma_sq[n]) \
-                * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])) \
+                """ r(n) update (C1) """
+                self.r[n] = self.r[n] + ((k_r / self.p.sigma_sq[n]) \
+                * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])))/32 \
                 - (k_r / 2) * self.g(self.r[n],self.p.alpha[n])[1] \
-                # classification term
-                + (k_r / 2) * (self.U_o.T.dot(label[:,None]) - self.U_o.T.dot(softmax(self.U_o.dot(self.r[n]))))
+                # # classification term
+                # + (k_o / 2) * (label[:,None] - softmax(self.r[n]))
+
+                # """ r(n) update (C2) """
+                # self.r[n] = self.r[n] + ((k_r / self.p.sigma_sq[n]) \
+                # * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])))/32 \
+                # - (k_r / 2) * self.g(self.r[n],self.p.alpha[n])[1] \
+                # # classification term
+                # + (k_r / 2) * (self.U_o.T.dot(label[:,None]) - self.U_o.T.dot(softmax(self.U_o.dot(self.r[n]))))
 
 
                 # U[n] update (C1, C2) (identical to U[i], except index numbers)
-                self.U[n] = self.U[n] + (k_U / self.p.sigma_sq[n]) \
-                * (self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])).dot(self.r[n].T) \
+                self.U[n] = self.U[n] + ((k_U / self.p.sigma_sq[n]) \
+                * (self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])).dot(self.r[n].T))/32 \
                 - (k_U / 2) * self.h(self.U[n],self.p.lam[n])[1]
 
 
-                """ U_o update (C2) """
-                self.o = np.exp(self.U_o.dot(self.r[n]))
-                self.U_o = self.U_o + label[:,None].dot(self.r[n].T) - len(label)*softmax((self.U_o.dot(self.r[n])).dot(self.r[n].T))
+                # """ U_o update (C2) """
+                # self.o = np.exp(self.U_o.dot(self.r[n]))
+                # self.U_o = self.U_o + label[:,None].dot(self.r[n].T) - len(label)*softmax((self.U_o.dot(self.r[n])).dot(self.r[n].T))
 
 
 
@@ -370,10 +370,10 @@ class PredictiveCodingClassifier:
                 # self.class_type = 'C1'
 
 
-                """ Classifying using C2 """
-                C = self.class_cost_2(label)
-                E = E + C
-                self.class_type = 'C2'
+                # """ Classifying using C2 """
+                # C = self.class_cost_2(label)
+                # E = E + C
+                # self.class_type = 'C2'
 
 
                 # Classification Accuracy
@@ -389,11 +389,11 @@ class PredictiveCodingClassifier:
                 #     num_correct += 1
 
 
-                """ C2 method """
-                c2_output = self.U_o.dot(self.r[n])
+                # """ C2 method """
+                # c2_output = self.U_o.dot(self.r[n])
 
-                if np.argmax(softmax(c2_output)) == np.argmax(label[:,None]):
-                    num_correct += 1
+                # if np.argmax(softmax(c2_output)) == np.argmax(label[:,None]):
+                #     num_correct += 1
 
 
             # store average costs and accuracy per epoch
@@ -521,8 +521,8 @@ class PredictiveCodingClassifier:
             # white:'#ffffff'
             # black:'#000000'
             # gold_yellow:'#ffe119'
-            
-            
+
+
             # black and navy
             plotE = ax.plot(num_updates, self.pe_1, '#000000', label="pe_1")
             plotE = ax.plot(num_updates, self.pe_2, '#000075', label="pe_2")
