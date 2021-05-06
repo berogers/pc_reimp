@@ -16,7 +16,7 @@ prior_type = 'gauss'
 # class_type = 'C1'
 class_type = 'C2'
 
-pcmod_in = open('pcmod_trained_ppixel_{}_{}.pydb'.format(prior_type,class_type),'rb')
+pcmod_in = open('pcmod_trained_1000imgs_100eps_randUo_{}_{}.pydb','rb')
 pcmod = pickle.load(pcmod_in)
 pcmod_in.close()
 

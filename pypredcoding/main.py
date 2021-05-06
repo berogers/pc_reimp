@@ -19,15 +19,15 @@ def main():
 
     #constant learning rates, optimal for tanh model without classification
     #r 0.05, U 0.05 o 0.05
-    p = ModelParameters(unit_act='tanh', 
-        hidden_sizes = [32,10], num_epochs = 1000,
+    p = ModelParameters(unit_act='tanh',
+        hidden_sizes = [32,10], num_epochs = 100,
         k_r_sched = {'constant':{'initial':0.05}},
         k_U_sched = {'constant':{'initial':0.05}},
         k_o_sched = {'constant':{'initial':0.0005}})
-    
+
     # #constant learning rates, optimal for tanh model without classification
     # #r 0.05, U 0.05 o 0.05
-    # p = ModelParameters(unit_act='tanh',r_prior = 'kurtotic', U_prior = 'kurtotic', 
+    # p = ModelParameters(unit_act='tanh',r_prior = 'kurtotic', U_prior = 'kurtotic',
     #     hidden_sizes = [32,10], num_epochs = 1000,
     #     k_r_sched = {'constant':{'initial':0.05}},
     #     k_U_sched = {'constant':{'initial':0.05}},
@@ -77,7 +77,7 @@ def main():
     # for a tanh model training on a tanh-optimized training set of 10digs x 10imgs open "tanh_10x10.pydb"
     # comment out the below three lines if using linear model
 
-    tanh_data_in = open('tanh_10x10.pydb','rb')
+    tanh_data_in = open('tanh_100x10.pydb','rb')
     X_train, y_train, training_img, non_training_img, scrm_training_img, lena_pw, lena_zoom = pickle.load(tanh_data_in)
     tanh_data_in.close()
 
@@ -96,7 +96,7 @@ def main():
     # class_type = 'C1'
     class_type = 'C2'
 
-    pcmod_out = open('pcmod_trained_ppixel_{}_{}.pydb'.format(prior_type,class_type),'wb')
+    pcmod_out = open('pcmod_trained_1000imgs_100eps_randUo_{}_{}.pydb'.format(prior_type,class_type),'wb')
     pickle.dump(pcmod, pcmod_out)
     pcmod_out.close()
 
