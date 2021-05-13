@@ -19,8 +19,12 @@ def main():
 
     #constant learning rates, optimal for tanh model without classification
     #r 0.05, U 0.05 o 0.05
+    
+    
+  
+
     p = ModelParameters(unit_act='tanh',
-        hidden_sizes = [32,10], num_epochs = 100,
+        hidden_sizes = [32,10], num_epochs = 50,
         k_r_sched = {'constant':{'initial':0.05}},
         k_U_sched = {'constant':{'initial':0.05}},
         k_o_sched = {'constant':{'initial':0.0005}})
@@ -96,7 +100,7 @@ def main():
     # class_type = 'C1'
     class_type = 'C2'
 
-    pcmod_out = open('pcmod_trained_1000imgs_100eps_randUo_{}_{}.pydb'.format(prior_type,class_type),'wb')
+    pcmod_out = open('pcmod_trained_ppixelfixed_[32,10]_1000imgs_50eps_{}_{}.pydb'.format(prior_type,class_type),'wb')
     pickle.dump(pcmod, pcmod_out)
     pcmod_out.close()
 

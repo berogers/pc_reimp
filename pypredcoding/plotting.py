@@ -16,7 +16,7 @@ prior_type = 'gauss'
 # class_type = 'C1'
 class_type = 'C2'
 
-pcmod_in = open('pcmod_trained_1000imgs_100eps_randUo_{}_{}.pydb','rb')
+pcmod_in = open('pcmod_trained_ppixelfixed_[32,10]_1000imgs_50eps_{}_{}.pydb'.format(prior_type,class_type),'rb')
 pcmod = pickle.load(pcmod_in)
 pcmod_in.close()
 
@@ -29,16 +29,16 @@ print('\n')
 # E,C and Accuracty data points for plotting
 
 # E
-round_first = round(pcmod.E_avg_per_epoch[0],1)
-round_epoch1 = round(pcmod.E_avg_per_epoch[1],1)
-round_last = round(pcmod.E_avg_per_epoch[-1],1)
-round_min = round(min(pcmod.E_avg_per_epoch),1)
+round_first = round(pcmod.E_avg_per_epoch[0],3)
+round_epoch1 = round(pcmod.E_avg_per_epoch[1],3)
+round_last = round(pcmod.E_avg_per_epoch[-1],3)
+round_min = round(min(pcmod.E_avg_per_epoch),3)
 
 # C
-C_round_first = round(pcmod.C_avg_per_epoch[0],1)
-C_round_last = round(pcmod.C_avg_per_epoch[-1],1)
-C_round_min = round(min(pcmod.C_avg_per_epoch),1)
-C_round_max = round(max(pcmod.C_avg_per_epoch),1)
+C_round_first = round(pcmod.C_avg_per_epoch[0],3)
+C_round_last = round(pcmod.C_avg_per_epoch[-1],3)
+C_round_min = round(min(pcmod.C_avg_per_epoch),3)
+C_round_max = round(max(pcmod.C_avg_per_epoch),3)
 
 # E+C
 Eavg_plus_Cavg_per_epoch = pcmod.E_avg_per_epoch + pcmod.C_avg_per_epoch
@@ -60,48 +60,149 @@ accuracy = pcmod.acc_per_epoch
 class_type = pcmod.class_type
 prior_type = pcmod.p.r_prior
 
+print(pcmod.E_avg_per_epoch)
+
 
 
 """
-Classification Data Plotting
+Classification Data Plotting w Two Axes (Costs are Not Scaled)
+"""
+
+# # plot E/Acc vs epoch; plot C/Acc vs epoch
+
+# # split into vertically-stacked subplots
+
+# fig, (axE, axC) = plt.subplots(2)
+# fig.suptitle("{}  {}  {}     ".format(pcmod.p.unit_act,prior_type,class_type)+"lr_r={} ".format(pcmod.lr_r)+"lr_U={} ".format(pcmod.lr_U)+"lr_o={}".format(pcmod.lr_o)+'\n'\
+# +'E1={} '.format(round_epoch1)+'Emin={} '.format(round_min)\
+# +'Cmax={} '.format(C_round_max)+'Cmin={} '.format(C_round_min) + 'Amax={} '.format(acc_max))
+
+# # create a second y-axis (Accuracy) for each subplot
+
+# twinEA = axE.twinx()
+# twinCA = axC.twinx()
+
+# # create labeled plot objects
+# # black, sky,
+# plotE = axE.plot(num_epochs, representation_cost, '#000000', label="Avg E")
+# plotC = axC.plot(num_epochs, classification_cost, '#4363d8', label="Avg C")
+# plotEA = twinEA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
+# plotCA = twinCA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
+
+# # set limits for and label x,y-axes for both subplots
+
+# # axE.set_xlim(0, 2)
+# axC.set_ylim(0, 0.15)
+# axE.set_ylim(0, 20)
+# twinEA.set_ylim(0, 100)
+# twinCA.set_ylim(0, 100)
+
+# axE.set_xlabel("Epoch")
+# axE.set_ylabel("Avg E")
+# twinEA.set_ylabel("Accuracy")
+
+# axC.set_xlabel("Epoch")
+# axC.set_ylabel("Avg C")
+# twinCA.set_ylabel("Accuracy")
+
+
+# # axE.legend()
+# # # twinEA.legend()
+# # axC.legend()
+
+
+# # show plot
+
+# plt.show()
+
+
+"""
+Classification Data Plotting w Two Axes (Costs are Scaled)
+"""
+
+# # plot E/Acc vs epoch; plot C/Acc vs epoch
+
+# # split into vertically-stacked subplots
+
+# fig, (axE, axC) = plt.subplots(2)
+# fig.suptitle("{}  {}  {}  {}  scaling_factor={} ".format(pcmod.p.unit_act,prior_type,class_type,pcmod.p.hidden_sizes,pcmod.ppixel_divisor)+'\n'\
+# +'E1={} '.format(round_epoch1)+'Emin={} '.format(round_min)\
+# +'Cmax={} '.format(C_round_max)+'Cmin={} '.format(C_round_min) + 'Amax={} '.format(acc_max))
+
+# # create a second y-axis (Accuracy) for each subplot
+
+# twinEA = axE.twinx()
+# twinCA = axC.twinx()
+
+# # create labeled plot objects
+# # black, sky,
+# plotE = axE.plot(num_epochs, representation_cost, '#000000', label="Avg E")
+# plotC = axC.plot(num_epochs, classification_cost, '#4363d8', label="Avg C")
+# plotEA = twinEA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
+# plotCA = twinCA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
+
+# # set limits for and label x,y-axes for both subplots
+
+# # axE.set_xlim(0, 2)
+# axC.set_ylim(0, 0.07)
+# axE.set_ylim(0, 0.07)
+# twinEA.set_ylim(0, 100)
+# twinCA.set_ylim(0, 100)
+
+# axE.set_xlabel("Epoch")
+# axE.set_ylabel("Avg E")
+# twinEA.set_ylabel("Accuracy")
+
+# axC.set_xlabel("Epoch")
+# axC.set_ylabel("Avg C")
+# twinCA.set_ylabel("Accuracy")
+
+
+# # axE.legend()
+# # # twinEA.legend()
+# # axC.legend()
+
+
+# # show plot
+
+# plt.show()
+
+
+
+"""
+Classification Data Plotting w One Axis (Costs are Scaled)
 """
 
 # plot E/Acc vs epoch; plot C/Acc vs epoch
 
 # split into vertically-stacked subplots
 
-fig, (axE, axC) = plt.subplots(2)
-fig.suptitle("{}  {}  {}     ".format(pcmod.p.unit_act,prior_type,class_type)+"lr_r={} ".format(pcmod.lr_r)+"lr_U={} ".format(pcmod.lr_U)+"lr_o={}".format(pcmod.lr_o)+'\n'\
+fig, (axE) = plt.subplots(1)
+fig.suptitle("{}  {}  {}  {}  ".format(pcmod.p.unit_act,prior_type,class_type,pcmod.p.hidden_sizes)+'\n'\
 +'E1={} '.format(round_epoch1)+'Emin={} '.format(round_min)\
 +'Cmax={} '.format(C_round_max)+'Cmin={} '.format(C_round_min) + 'Amax={} '.format(acc_max))
 
 # create a second y-axis (Accuracy) for each subplot
 
 twinEA = axE.twinx()
-twinCA = axC.twinx()
+
 
 # create labeled plot objects
 # black, sky,
 plotE = axE.plot(num_epochs, representation_cost, '#000000', label="Avg E")
-plotC = axC.plot(num_epochs, classification_cost, '#4363d8', label="Avg C")
+plotC = axE.plot(num_epochs, classification_cost, '#4363d8', label="Avg C")
 plotEA = twinEA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
-plotCA = twinCA.plot(num_epochs, accuracy, 'darkgreen', label="Accuracy")
 
 # set limits for and label x,y-axes for both subplots
 
 # axE.set_xlim(0, 2)
-axC.set_ylim(0, 0.15)
-axE.set_ylim(0, 20)
+axE.set_ylim(0, 0.07)
 twinEA.set_ylim(0, 100)
-twinCA.set_ylim(0, 100)
+
 
 axE.set_xlabel("Epoch")
-axE.set_ylabel("Avg E")
+axE.set_ylabel("Avg E + Avg C")
 twinEA.set_ylabel("Accuracy")
-
-axC.set_xlabel("Epoch")
-axC.set_ylabel("Avg C")
-twinCA.set_ylabel("Accuracy")
 
 
 # axE.legend()
@@ -115,6 +216,8 @@ plt.show()
 
 
 
+
+
 """
 Plotting When No Classification (e.g. Training Model for Prediction)
 """
@@ -122,7 +225,7 @@ Plotting When No Classification (e.g. Training Model for Prediction)
 
 
 # fig, ax = plt.subplots(1)
-# fig.suptitle("{}  {}  {}     ".format(pcmod.p.unit_act,prior_type,class_type)+\
+# fig.suptitle("{}  {}  {}  {}   ".format(pcmod.p.unit_act,prior_type,class_type,pcmod.p.hidden_sizes)+\
 # "lr_r={} ".format(pcmod.lr_r)+"lr_U={} ".format(pcmod.lr_U)+'\n'\
 # +'E1={} '.format(round_epoch1)+'Emin={} '.format(round_min))
 
@@ -130,7 +233,7 @@ Plotting When No Classification (e.g. Training Model for Prediction)
 # # black and keylime
 # plotE = ax.plot(num_epochs, representation_cost, '#000000', label="Avg E")
 
-# ax.set_ylim(0, 20)
+# ax.set_ylim(0, 1)
 
 # ax.set_xlabel("Epoch")
 # ax.set_ylabel("Avg E")

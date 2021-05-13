@@ -163,6 +163,8 @@ class PredictiveCodingClassifier:
         print("len(self.r): " + str(len(self.r)))
         print('\n')
 
+        self.ppixel_cost_scaling_factor = len(self.r[0]) + len(self.r[1])
+
         # initialize "output" layer
         self.o = np.random.randn(self.p.output_size,1)
         # and final set of weights to the output
@@ -196,7 +198,7 @@ class PredictiveCodingClassifier:
         # LSQ cost
         for i in range(0,len(self.r)-1):
             v = (self.r[i] - self.f(self.U[i+1].dot(self.r[i+1]))[0])
-            E = E + ((1 / self.p.sigma_sq[i+1]) * v.T.dot(v))[0,0]
+            E = E + ((1 / self.p.sigma_sq[i+1]) * ((v.T.dot(v))/self.ppixel_cost_scaling_factor))[0,0]
         # priors on r[1],...,r[n]; U[1],...,U[n]
         for i in range(1,len(self.r)):
             E = E + (self.h(self.U[i],self.p.lam[i])[0] + self.g(np.squeeze(self.r[i]),self.p.alpha[i])[0])
@@ -315,28 +317,28 @@ class PredictiveCodingClassifier:
 
                     # NOTE: self.p.k_r learning rate
                     # r[i] update
-                    self.r[i] = self.r[i] + (k_r / self.p.sigma_sq[i]) \
-                    * self.U[i].T.dot(self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])) \
-                    + (k_r / self.p.sigma_sq[i+1]) * (self.f(self.U[i+1].dot(self.r[i+1]))[0] - self.r[i]) \
+                    self.r[i] = self.r[i] + ((k_r / self.p.sigma_sq[i]) \
+                    * self.U[i].T.dot(self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])))/self.ppixel_cost_scaling_factor \
+                    + ((k_r / self.p.sigma_sq[i+1]) * (self.f(self.U[i+1].dot(self.r[i+1]))[0] - self.r[i]))/self.ppixel_cost_scaling_factor \
                     - (k_r / 2) * self.g(self.r[i],self.p.alpha[i])[1]
 
 
                     # U[i] update
-                    self.U[i] = self.U[i] + (k_U / self.p.sigma_sq[i]) \
-                    * (self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])).dot(self.r[i].T) \
+                    self.U[i] = self.U[i] + ((k_U / self.p.sigma_sq[i]) \
+                    * (self.f(self.U[i].dot(self.r[i]))[1].dot(self.r[i-1] - self.f(self.U[i].dot(self.r[i]))[0])).dot(self.r[i].T))/self.ppixel_cost_scaling_factor \
                     - (k_U / 2) * self.h(self.U[i],self.p.lam[i])[1]
 
 
                 # """ r(n) update (C1) """
-                # self.r[n] = self.r[n] + (k_r / self.p.sigma_sq[n]) \
-                # * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])) \
+                # self.r[n] = self.r[n] + ((k_r / self.p.sigma_sq[n]) \
+                # * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])))/self.ppixel_cost_scaling_factor \
                 # - (k_r / 2) * self.g(self.r[n],self.p.alpha[n])[1] \
                 # # classification term
                 # + (k_o / 2) * (label[:,None] - softmax(self.r[n]))
 
                 """ r(n) update (C2) """
-                self.r[n] = self.r[n] + (k_r / self.p.sigma_sq[n]) \
-                * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])) \
+                self.r[n] = self.r[n] + ((k_r / self.p.sigma_sq[n]) \
+                * self.U[n].T.dot(self.f(self.U[n].dot(self.r[n]))[1].dot(self.r[n-1] - self.f(self.U[n].dot(self.r[n]))[0])))/self.ppixel_cost_scaling_factor \
                 - (k_r / 2) * self.g(self.r[n],self.p.alpha[n])[1] \
                 # classification term
                 + (k_r / 2) * (self.U_o.T.dot(label[:,None]) - self.U_o.T.dot(softmax(self.U_o.dot(self.r[n]))))
@@ -348,9 +350,9 @@ class PredictiveCodingClassifier:
                 - (k_U / 2) * self.h(self.U[n],self.p.lam[n])[1]
 
 
-                # """ U_o update (C2) """
-                # self.o = np.exp(self.U_o.dot(self.r[n]))
-                # self.U_o = self.U_o + label[:,None].dot(self.r[n].T) - len(label)*softmax((self.U_o.dot(self.r[n])).dot(self.r[n].T))
+                """ U_o update (C2) """
+                self.o = np.exp(self.U_o.dot(self.r[n]))
+                self.U_o = self.U_o + label[:,None].dot(self.r[n].T) - len(label)*softmax((self.U_o.dot(self.r[n])).dot(self.r[n].T))
 
 
 
